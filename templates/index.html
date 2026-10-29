@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mosquito Mayhem</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <h1>🦟 Mosquito Mayhem</h1>
+    <p>Pick a room. Grab your racket. Swat them all.</p>
+  </header>
+  <main class="main">
+  {% if page == 'home' %}
+    <section class="panel home-panel">
+      <div class="hero-icon">🏸 🦟</div>
+      <h2>Where will you hunt?</h2>
+      <p>Choose a room and swat all 20 flying mosquitoes to finish the round!</p>
+      <form method="post" action="{{ url_for('start') }}">
+        <fieldset class="room-picker">
+          <legend>Choose your room</legend>
+          <label class="choice"><input type="radio" name="room" value="bedroom" checked><span>🛏️ Bedroom</span></label>
+          <label class="choice"><input type="radio" name="room" value="kitchen"><span>🍳 Kitchen</span></label>
+          <label class="choice"><input type="radio" name="room" value="living"><span>🛋️ Living Room</span></label>
+        </fieldset>
+        <button type="submit" class="button start">Start Game</button>
+      </form>
+      <p class="tip">Move your mouse into the room to use the mosquito racket.</p>
+    </section>
+  {% elif page == 'game' %}
+    <form method="post" action="{{ url_for('stop') }}" class="play-form">
+      <input type="hidden" name="round_token" value="{{ token }}">
+      <div class="toolbar">
+        <div><h2>{{ room_name }} Hunt</h2><p>Swat all 20 mosquitoes to complete the round!</p></div>
+        <a href="{{ url_for('home') }}" class="exit-link">Exit Game</a>
+      </div>
+      <div class="room room-{{ room }}" aria-label="{{ room_name }} with clickable mosquitoes">
+        {% if room == 'bedroom' %}
+          <div class="window"><span></span><span></span><span></span><span></span></div>
+          <div class="wall-art">🌄</div><div class="rug"></div>
+          <div class="bed"><div class="pillow"></div><div class="blanket"></div></div>
+          <div class="nightstand"><div class="lamp">💡</div></div><div class="plant">🪴</div>
+        {% elif room == 'kitchen' %}
+          <div class="kitchen-window">☀️</div><div class="kitchen-hood"></div>
+          <div class="upper-cabinet cabinet-one"></div><div class="upper-cabinet cabinet-two"></div>
+          <div class="counter"></div><div class="sink">🚰</div><div class="stove">🍲</div>
+          <div class="fridge"><span>❄️</span></div><div class="kitchen-tile"></div>
+        {% elif room == 'living' %}
+          <div class="living-window">☁️</div><div class="living-picture">🌅</div>
+          <div class="living-rug"></div><div class="sofa"><div class="cushion c1"></div><div class="cushion c2"></div></div>
+          <div class="coffee-table"></div><div class="tv">▶</div><div class="living-plant">🪴</div>
+        {% endif %}
+        {% for mosquito in mosquitoes %}
+          <div class="target" style="left: {{ mosquito.x }}%; top: {{ mosquito.y }}%;">
+            <input class="mosquito-check" type="checkbox" name="killed"
+                   value="{{ mosquito.id }}" id="mosquito-{{ mosquito.id }}">
+            <label class="mosquito" for="mosquito-{{ mosquito.id }}"
+                   style="animation-delay: {{ mosquito.delay }}s;"
+                   aria-label="Swat mosquito {{ mosquito.id + 1 }}">🦟</label>
+          </div>
+        {% endfor %}
+      </div>
+      <section class="completed" role="status" aria-live="polite">
+        <div class="completed-icon">🏆</div>
+        <h2>Room cleared! All 20 mosquitoes swatted!</h2>
+        <p>You've completed the hunt. View your final results below.</p>
+        <button type="submit" class="button start">View Results</button>
+      </section>
+      <p class="help active-hint">Use the racket to swat all 20 mosquitoes. The round ends when the last one disappears.</p>
+    </form>
+  {% elif page == 'results' %}
+    <section class="panel">
+      <div class="hero-icon">🏆</div><h2>{{ room_name }} hunt complete!</h2>
+      <p>You swatted</p><div class="big-score">{{ kills }} <span>/ {{ total }}</span></div>
+      <p>mosquitoes</p>
+      <div class="stats">
+        <div><strong>{{ elapsed }}s</strong><span>Elapsed time</span></div>
+        <div><strong>{{ kpm }}</strong><span>Kills per minute</span></div>
+      </div>
+      <form method="post" action="{{ url_for('start') }}">
+        <input type="hidden" name="room" value="{{ room }}">
+        <button class="button start" type="submit">Replay This Room</button>
+      </form>
+      <a class="home-link" href="{{ url_for('home') }}">Choose a different room</a>
+    </section>
+  {% endif %}
+  </main>
+</body>
+</html>
