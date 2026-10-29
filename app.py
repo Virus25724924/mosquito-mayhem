@@ -5,7 +5,7 @@ import secrets
 import time
 
 app = Flask(__name__)
-app.secret_key = os.environ("SECRET_KEY")
+app.secret_key = os.environ["SECRET_KEY"]
 
 ROOMS = {'bedroom': 'Bedroom', 'kitchen': 'Kitchen', 'living': 'Living Room'}
 MOSQUITO_COUNT = 20
